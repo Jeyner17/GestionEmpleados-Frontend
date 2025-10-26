@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">
+      <img src="assets/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2" *ngIf="false">
+      <strong>PROVEDATOS</strong> - Gestión de Empleados
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="bi bi-house-door"></i> Inicio
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/empleados" routerLinkActive="active">
+            <i class="bi bi-people"></i> Empleados
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/crear-empleado" routerLinkActive="active">
+            <i class="bi bi-person-plus"></i> Nuevo Empleado
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/reporte" routerLinkActive="active">
+            <i class="bi bi-file-earmark-text"></i> Reporte
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

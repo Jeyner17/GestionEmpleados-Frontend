@@ -1,0 +1,181 @@
+<div class="container-fluid mt-4 mb-5">
+  <div class="row mb-4 no-print">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-light text-center">
+          <h3 class="mb-0">Módulo de Empleados</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-warning text-center">
+          <h5 class="mb-0">REPORTE EMPLEADO</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-danger no-print" *ngIf="error">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+
+  <div class="text-center my-5 no-print" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Generando reporte...</p>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div class="row mb-3 no-print">
+      <div class="col-md-6">
+        <p class="text-muted mb-0">
+          <strong>Total de empleados:</strong> {{ empleadosFiltrados.length }}
+        </p>
+        <p class="text-muted">
+          <strong>Fecha de generación:</strong> {{ fechaActual | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <div class="col-md-6 text-end">
+        <button class="btn btn-primary btn-sm me-2" (click)="imprimirReporte()">
+          <i class="bi bi-printer"></i> Imprimir
+        </button>
+        <button class="btn btn-success btn-sm me-2" (click)="exportarExcel()">
+          <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </button>
+        <button class="btn btn-info btn-sm" (click)="exportarCSV()">
+          <i class="bi bi-file-earmark-text"></i> Exportar CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-sm mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th class="sortable" (click)="sortBy('codigo_empleado')">
+                  Código <i class="bi" [ngClass]="getSortIcon('codigo_empleado')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('nombres')">
+                  Nombres <i class="bi" [ngClass]="getSortIcon('nombres')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('apellidos')">
+                  Apellidos <i class="bi" [ngClass]="getSortIcon('apellidos')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('cedula')">
+                  Cédula <i class="bi" [ngClass]="getSortIcon('cedula')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('provincia_residencia.nombre_provincia')">
+                  Provincia Res. <i class="bi" [ngClass]="getSortIcon('provincia_residencia.nombre_provincia')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('fecha_nacimiento')">
+                  F. Nacimiento <i class="bi" [ngClass]="getSortIcon('fecha_nacimiento')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('email')">
+                  Email <i class="bi" [ngClass]="getSortIcon('email')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('fecha_ingreso')">
+                  F. Ingreso <i class="bi" [ngClass]="getSortIcon('fecha_ingreso')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('cargo')">
+                  Cargo <i class="bi" [ngClass]="getSortIcon('cargo')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('departamento')">
+                  Departamento <i class="bi" [ngClass]="getSortIcon('departamento')"></i>
+                </th>
+                <th class="sortable" (click)="sortBy('provincia_laboral.nombre_provincia')">
+                  Provincia Lab. <i class="bi" [ngClass]="getSortIcon('provincia_laboral.nombre_provincia')"></i>
+                </th>
+                <th class="sortable text-end" (click)="sortBy('sueldo')">
+                  Sueldo <i class="bi" [ngClass]="getSortIcon('sueldo')"></i>
+                </th>
+                <th class="sortable text-center" (click)="sortBy('jornada_parcial')">
+                  J. Parcial <i class="bi" [ngClass]="getSortIcon('jornada_parcial')"></i>
+                </th>
+                <th class="sortable text-center" (click)="sortBy('estado')">
+                  Estado <i class="bi" [ngClass]="getSortIcon('estado')"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let empleado of empleadosFiltrados">
+                <td class="small">{{ empleado.codigo_empleado }}</td>
+                <td class="small">{{ empleado.nombres }}</td>
+                <td class="small">{{ empleado.apellidos }}</td>
+                <td class="small">{{ empleado.cedula }}</td>
+                <td class="small">{{ empleado.provincia_residencia?.nombre_provincia || '-' }}</td>
+                <td class="small">{{ formatDate(empleado.fecha_nacimiento) }}</td>
+                <td class="small">{{ empleado.email }}</td>
+                <td class="small">{{ formatDate(empleado.fecha_ingreso) }}</td>
+                <td class="small">{{ empleado.cargo }}</td>
+                <td class="small">{{ empleado.departamento }}</td>
+                <td class="small">{{ empleado.provincia_laboral?.nombre_provincia || '-' }}</td>
+                <td class="small text-end">{{ formatCurrency(empleado.sueldo) }}</td>
+                <td class="small text-center">
+                  <span *ngIf="empleado.jornada_parcial" class="badge bg-info">Sí</span>
+                  <span *ngIf="!empleado.jornada_parcial" class="badge bg-secondary">No</span>
+                </td>
+                <td class="small text-center">
+                  <span [ngClass]="getEstadoBadgeClass(empleado.estado || 'VIGENTE')">
+                    {{ empleado.estado }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="empleadosFiltrados.length === 0">
+                <td colspan="14" class="text-center text-muted py-4">
+                  <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                  <p class="mt-2">No hay empleados para mostrar en el reporte</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4 no-print">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title text-primary">{{ empleadosFiltrados.length }}</h5>
+            <p class="card-text small text-muted">Total Empleados</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title text-success">
+              {{ getEmpleadosVigentes() }}
+            </h5>
+            <p class="card-text small text-muted">Vigentes</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title text-info">
+              {{ getEmpleadosJornadaParcial() }}
+            </h5>
+            <p class="card-text small text-muted">Jornada Parcial</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4 mb-4 no-print">
+      <div class="col-12 text-center">
+        <button class="btn btn-danger btn-lg" routerLink="/empleados">
+          <i class="bi bi-box-arrow-left"></i> Salir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

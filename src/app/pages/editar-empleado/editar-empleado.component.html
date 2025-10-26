@@ -1,0 +1,246 @@
+<div class="container mt-4 mb-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-light text-center">
+          <h3 class="mb-0">Módulo de Empleados</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body bg-info text-white text-center">
+          <h5 class="mb-0">EDITAR EMPLEADO</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center my-5" *ngIf="loadingEmpleado">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Cargando datos del empleado...</p>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="error && !loadingEmpleado">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+
+  <div *ngIf="!loadingEmpleado">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'personal'" (click)="cambiarTab('personal')"
+              style="cursor: pointer;">
+              Datos Personales
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'laboral'" (click)="cambiarTab('laboral')"
+              style="cursor: pointer;">
+              Datos Laborales
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-body">
+        <div *ngIf="activeTab === 'personal'">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Nombres <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="empleado.nombres"
+                [class.is-invalid]="hasError('nombres')" placeholder="Ingrese los nombres">
+              <div class="invalid-feedback" *ngIf="hasError('nombres')">
+                {{ getError('nombres') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="empleado.apellidos"
+                [class.is-invalid]="hasError('apellidos')" placeholder="Ingrese los apellidos">
+              <div class="invalid-feedback" *ngIf="hasError('apellidos')">
+                {{ getError('apellidos') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Cédula (Válida) <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="empleado.cedula"
+                [class.is-invalid]="hasError('cedula')" placeholder="Solo números (10 dígitos)" maxlength="10"
+                pattern="[0-9]*" (keypress)="onlyNumbers($event)">
+              <div class="invalid-feedback" *ngIf="hasError('cedula')">
+                {{ getError('cedula') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Provincia</label>
+              <select class="form-select" [(ngModel)]="empleado.provincia_id" [disabled]="loadingProvincias">
+                <option [ngValue]="undefined">Escoja una provincia...</option>
+                <option *ngFor="let provincia of provincias" [ngValue]="provincia.id">
+                  {{ provincia.nombre_provincia }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Fecha de Nacimiento <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="empleado.fecha_nacimiento"
+                [class.is-invalid]="hasError('fecha_nacimiento')">
+              <div class="invalid-feedback" *ngIf="hasError('fecha_nacimiento')">
+                {{ getError('fecha_nacimiento') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Email (Válida) <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" [(ngModel)]="empleado.email"
+                [class.is-invalid]="hasError('email')" placeholder="correo-personal@email.com">
+              <div class="invalid-feedback" *ngIf="hasError('email')">
+                {{ getError('email') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Observaciones:</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="empleado.observaciones_personales"
+                placeholder="Comentario u observación referente a la ficha personal"></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Fotografía:</label>
+              <div class="text-center">
+                <div class="mb-2">
+                  <img [src]="fotoPreview || 'assets/default-avatar.png'" alt="Foto preview"
+                    class="img-thumbnail rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                </div>
+                <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)">
+                <small class="text-muted">Máximo 2MB - JPG, PNG, GIF</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 text-center">
+              <button class="btn btn-success btn-lg" (click)="cambiarTab('laboral')">
+                <i class="bi bi-arrow-right-circle"></i> Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'laboral'">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Fecha de Ingreso <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="empleado.fecha_ingreso"
+                [class.is-invalid]="hasError('fecha_ingreso')">
+              <div class="invalid-feedback" *ngIf="hasError('fecha_ingreso')">
+                {{ getError('fecha_ingreso') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Cargo <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="empleado.cargo"
+                [class.is-invalid]="hasError('cargo')" placeholder="Ingrese el cargo">
+              <div class="invalid-feedback" *ngIf="hasError('cargo')">
+                {{ getError('cargo') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Departamento: <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="empleado.departamento"
+                [class.is-invalid]="hasError('departamento')" placeholder="Ingrese el departamento">
+              <div class="invalid-feedback" *ngIf="hasError('departamento')">
+                {{ getError('departamento') }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Provincia:</label>
+              <select class="form-select" [(ngModel)]="empleado.provincia_laboral_id" [disabled]="loadingProvincias">
+                <option [ngValue]="undefined">Escoja una provincia...</option>
+                <option *ngFor="let provincia of provincias" [ngValue]="provincia.id">
+                  {{ provincia.nombre_provincia }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Sueldo: <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" [(ngModel)]="empleado.sueldo"
+                  [class.is-invalid]="hasError('sueldo')" min="0" step="0.01" placeholder="530.00">
+                <span class="input-group-text">USD</span>
+                <div class="invalid-feedback" *ngIf="hasError('sueldo')">
+                  {{ getError('sueldo') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block">Jornada Parcial <span class="text-danger">*</span></label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" [value]="true" [(ngModel)]="empleado.jornada_parcial"
+                  id="jornadaSi">
+                <label class="form-check-label" for="jornadaSi">
+                  Sí
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" [value]="false" [(ngModel)]="empleado.jornada_parcial"
+                  id="jornadaNo">
+                <label class="form-check-label" for="jornadaNo">
+                  No
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Estado <span class="text-danger">*</span></label>
+              <select class="form-select" [(ngModel)]="empleado.estado">
+                <option value="VIGENTE">VIGENTE</option>
+                <option value="RETIRADO">RETIRADO</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-bold">Observaciones:</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="empleado.observaciones_laborales"
+                placeholder="Comentario u observación referente a LA FICHA LABORAL"></textarea>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 text-center">
+              <button class="btn btn-success btn-lg me-2" (click)="guardar()" [disabled]="loading">
+                <span *ngIf="!loading">
+                  <i class="bi bi-check-circle"></i> Guardar
+                </span>
+                <span *ngIf="loading">
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Guardando...
+                </span>
+              </button>
+              <button class="btn btn-warning btn-lg me-2" disabled>
+                <i class="bi bi-file-earmark-text"></i> Reporte
+              </button>
+              <button class="btn btn-danger btn-lg" (click)="cancelar()" [disabled]="loading">
+                <i class="bi bi-x-circle"></i> Salir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
